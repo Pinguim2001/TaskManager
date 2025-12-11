@@ -1,0 +1,205 @@
+﻿@model IEnumerable<Tasks>
+@{
+    ViewData["Title"] = "Task Manager";
+}
+<div>
+    <div class="container-fluid d-flex justify-content-center">
+        <h2 aling>Bem vindo a Task Manager!! </h2>
+    </div>
+    <div class="container-fluid d-flex justify-content-center">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                Cadastrar Tarefa
+            </button>
+    </div>
+</div>
+
+@await Html.PartialAsync("Create", new Tasks())
+@await Html.PartialAsync("Update")
+@await Html.PartialAsync("Delete")
+
+<!-- Lista de tarefas -->
+<div class="container mt-4">
+
+    <!--  FILTROS  -->
+<div class="card mb-3">
+    <div class="card-body">
+
+        <h5 class="mb-3">Filtros</h5>
+
+        <div class="row g-3">
+
+            <!-- Palavra-chave -->
+            <div class="col-md-4">
+                <label class="form-label">Pesquisar</label>
+                <input type="text" id="filtroTexto" class="form-control" placeholder="Título ou descrição...">
+            </div>
+
+            <!-- Data inicial -->
+            <div class="col-md-3">
+                <label class="form-label">Data Inicial</label>
+                <input type="date" id="filtroDataInicio" class="form-control">
+            </div>
+
+            <!-- Data final -->
+            <div class="col-md-3">
+                <label class="form-label">Data Final</label>
+                <input type="date" id="filtroDataFim" class="form-control">
+            </div>
+
+            <!-- Somente finalizadas -->
+            <div class="col-md-2 d-flex align-items-end">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="filtroFinalizadas">
+                    <label class="form-check-label" for="filtroFinalizadas">
+                        Finalizadas
+                    </label>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+    <!-- TABELA -->
+    <table class="table table-hover table-bordered align-middle" id="tabelaTarefas">
+        <thead class="table-light">
+            <tr>
+                <th class="sortable">#</th>
+                <th class="sortable">Título</th>
+                <th class="sortable">Descrição</th>
+                <th class="sortable">Data de Criação</th>
+                <th class="sortable">Data de Conclusão</th>
+                <th>Finalizada?</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if(Model != null && Model.Any())
+            {
+                foreach(Tasks task in Model)
+                {
+                    <tr class="@(task.IsCompleted ? "table-success" : "")">
+                        <td>@task.Id</td>
+                        <td>@task.Title</td>
+                        <td>@task.Description</td>
+                        <td>@task.CreatedAt.ToString("yyyy-MM-dd")</td>
+                        <td>@task.DueDate?.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            <form asp-controller="Tasks" asp-action="ToggleComplete" method="post">
+                                <input type="hidden" name="id" value="@task.Id" />
+                                <input type="checkbox"
+                                       name="isCompleted"
+                                       value="@task.IsCompleted"
+                                       @(task.IsCompleted ? "checked" : "")
+                                       onclick="this.value = this.checked ? 'true' : 'false'; this.form.submit();" />
+                            </form>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-warning"
+                                        data-id="@task.Id"
+                                        data-title="@task.Title"
+                                        data-description="@task.Description"
+                                        data-createdat="@task.CreatedAt.ToString("yyyy-MM-dd")"
+                                        data-duedate="@task.DueDate?.ToString("yyyy-MM-dd")"
+                                        asp-route-id="@task.Id" data-bs-toggle="modal" data-bs-target="#UpdateModal">
+                                    Editar
+                                </button>
+                                <button type="button" data-id="@task.Id" data-title="@task.Title" class="btn btn-sm btn-danger" asp-route-id="@task.Id" data-bs-toggle="modal" data-bs-target="#deleteConfirmation">
+                                    Excluir
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center">Nenhuma tarefa encontrada.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+
+<script>
+        document.querySelectorAll('.check-complete').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const id = cb.dataset.id;
+            const isCompleted = cb.checked;
+
+            fetch("/Tasks/ToggleComplete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ id, isCompleted })
+            });
+        });
+    });
+    // Ordenação
+    document.querySelectorAll(".sortable").forEach(header => {
+        header.addEventListener("click", () => {
+            const table = header.closest("table");
+            const index = Array.from(header.parentNode.children).indexOf(header);
+            const rows = Array.from(table.querySelectorAll("tbody tr"));
+
+            const asc = !header.classList.contains("asc");
+            rows.sort((a, b) => {
+                let v1 = a.children[index].innerText.toLowerCase();
+                let v2 = b.children[index].innerText.toLowerCase();
+                return asc ? v1.localeCompare(v2) : v2.localeCompare(v1);
+            });
+
+            table.querySelector("tbody").innerHTML = "";
+            rows.forEach(r => table.querySelector("tbody").appendChild(r));
+
+            document.querySelectorAll(".sortable").forEach(h => h.classList.remove("asc", "desc"));
+            header.classList.add(asc ? "asc" : "desc");
+        });
+    });
+
+    // Filtros
+    const aplicarFiltros = () => {
+        const texto = document.getElementById("filtroTexto").value.toLowerCase();
+        const inicio = document.getElementById("filtroDataInicio").value;
+        const fim = document.getElementById("filtroDataFim").value;
+        const finalizadas = document.getElementById("filtroFinalizadas").checked;
+
+        document.querySelectorAll("#tabelaTarefas tbody tr").forEach(row => {
+            const titulo = row.children[1].innerText.toLowerCase();
+            const desc = row.children[2].innerText.toLowerCase();
+            const dataCriacao = row.children[3].innerText;
+            const dataConclusao = row.children[4].innerText;
+            const isFinalizada = row.children[5].querySelector("input").checked;
+
+            let mostrar = true;
+
+            // Data inicial
+            if (inicio && dataCriacao < inicio) {
+                mostrar = false;
+            }
+
+            // Data final
+            if (fim && dataCriacao > fim) {
+                mostrar = false;
+            }
+
+            // Finalizadas
+            if (finalizadas && !isFinalizada) {
+                mostrar = false;
+            }
+
+            row.style.display = mostrar ? "" : "none";
+        });
+    };
+
+    document.querySelectorAll("#filtroTexto, #filtroDataInicio, #filtroDataFim, #filtroFinalizadas")
+        .forEach(el => el.addEventListener("input", aplicarFiltros));
+</script>
+
+

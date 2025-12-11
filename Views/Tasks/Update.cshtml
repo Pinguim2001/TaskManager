@@ -1,0 +1,77 @@
+﻿@{
+    var date = DateTime.Now.ToString("yyyy-MM-dd");
+}
+<div class="modal fade" id="UpdateModal" tabindex="-1" aria-labelledby="UpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formTarefaUpdate" method="post" asp-controller="Tasks" asp-action="Update">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Editar Tarefa</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <input type="hidden" id="Update_Id" name="Id">
+
+                    <!-- TÍTULO -->
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label">Título</label>
+                        <input type="text"
+                               class="form-control"
+                               id="Update_Title"
+                               name="Title"
+                               required>
+                    </div>
+                    <!-- DESCRIÇÃO -->
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label">Descrição</label>
+                        <textarea class="form-control" name="Description" id="Update_Description" rows="3" required></textarea>
+                    </div>
+                    <!-- DATA -->
+                    <div class="mb-3">
+                        <label for="dataCriacao" class="form-label">Data</label>
+                        <input type="date" class="form-control" name="CreatedAt" id="Update_CreatedAt" required>
+                    </div>
+                    <!-- DATA DE CONCLUSÃO -->
+                    <div class="mb-3">
+                        <label for="dataConclusao" class="form-label">Data de Conclusão</label>
+                        <input type="date" class="form-control" name="DueDate" id="Update_DueDate" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+              document.addEventListener("DOMContentLoaded", function () {
+
+        var updateModal = document.getElementById('UpdateModal');
+
+        updateModal.addEventListener('show.bs.modal', function (event) {
+
+            var button = event.relatedTarget;
+
+            document.getElementById('Update_Id').value =
+                button.getAttribute('data-id') || "";
+
+            document.getElementById('Update_Title').value =
+                button.getAttribute('data-title') || "";
+
+            document.getElementById('Update_Description').value =
+                button.getAttribute('data-description') || "";
+
+            document.getElementById('Update_CreatedAt').value =
+                button.getAttribute('data-createdat') || "";
+
+            document.getElementById('Update_DueDate').value =
+                button.getAttribute('data-duedate') || "";
+        });
+    });
+
+
+</script>
+

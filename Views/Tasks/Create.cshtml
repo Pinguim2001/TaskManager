@@ -1,0 +1,47 @@
+﻿@model Tasks
+@{
+    var date = DateTime.Now.ToString("yyyy-MM-dd");
+}
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formTarefa" method="post" asp-controller="Tasks" asp-action="Create">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Cadastrar Tarefa</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- TÍTULO -->
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label">Título</label>
+                        <input type="text"
+                               class="form-control"
+                               asp-for="Title"
+                               id="Title"
+                               placeholder="Digite o título da tarefa"
+                               required>
+                    </div>
+                    <!-- DESCRIÇÃO -->
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label">Descrição</label>
+                        <textarea class="form-control" asp-for="Description" id="Description" placeholder="Digite uma descrição" rows="3" required></textarea>
+                    </div>
+                    <!-- DATA -->
+                    <div class="mb-3">
+                        <label for="dataCriacao" class="form-label">Data</label>
+                        <input type="date" class="form-control" asp-for="CreatedAt" id="CreatedAt" value="@date" required>
+                    </div>
+                    <!-- DATA DE CONCLUSÃO -->
+                    <div class="mb-3">
+                        <label for="dataConclusao" class="form-label">Data de Conclusão</label>
+                        <input type="date" class="form-control" asp-for="DueDate" id="dataConclusao" value="" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
